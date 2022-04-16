@@ -11,6 +11,12 @@ module.exports = {
     'jsx-a11y/href-no-hash': ['off'],
     'react/jsx-filename-extension': ['warn', { extensions: ['.js', '.jsx'] }],
     // my customs
+    'prettier/prettier': [
+      'error',
+      {
+        'endOfLine': 'auto',
+      },
+    ],
     'no-unused-vars': 'warn',
     'no-console': ['warn', { allow: ['error'] }],
     'import/prefer-default-export': 'off',
