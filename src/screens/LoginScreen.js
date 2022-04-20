@@ -1,32 +1,27 @@
 import React, { useState } from 'react'
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
 import { TouchableOpacity, StyleSheet, View } from 'react-native'
 import { Text } from 'react-native-paper'
-import Background from '../components/Background'
+import Background from '../components/LoginBackground'
 import Logo from '../components/Logo'
 import Header from '../components/Header'
 import Button from '../components/Button'
 import TextInput from '../components/TextInput'
 import BackButton from '../components/BackButton'
 import { theme } from '../core/theme'
-import { emailValidator } from '../helpers/emailValidator'
-import { passwordValidator } from '../helpers/passwordValidator'
+import { login } from '../redux/auth/login.action'
 
-export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState({ value: '', error: '' })
-  const [password, setPassword] = useState({ value: '', error: '' })
+// import { emailValidator } from '../helpers/emailValidator'
+// import { passwordValidator } from '../helpers/passwordValidator'
+
+function LoginScreen(props) {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const { loginFunc, navigation } = props
 
   const onLoginPressed = () => {
-    const emailError = emailValidator(email.value)
-    const passwordError = passwordValidator(password.value)
-    if (emailError || passwordError) {
-      setEmail({ ...email, error: emailError })
-      setPassword({ ...password, error: passwordError })
-      return
-    }
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Dashboard' }],
-    })
+    loginFunc(username, password, navigation)
   }
 
   return (
@@ -35,26 +30,21 @@ export default function LoginScreen({ navigation }) {
       <Logo />
       <Header>Welcome back.</Header>
       <TextInput
-        label="Email"
+        label="Username"
         returnKeyType="next"
-        value={email.value}
-        onChangeText={(text) => setEmail({ value: text, error: '' })}
-        error={!!email.error}
-        errorText={email.error}
+        value={username}
+        onChangeText={(text) => setUsername(text)}
         autoCapitalize="none"
-        autoCompleteType="email"
-        textContentType="emailAddress"
-        keyboardType="email-address"
       />
       <TextInput
         label="Password"
         returnKeyType="done"
-        value={password.value}
-        onChangeText={(text) => setPassword({ value: text, error: '' })}
-        error={!!password.error}
-        errorText={password.error}
+        value={password}
+        onChangeText={(text) => setPassword(text)}
+        autoCapitalize="none"
         secureTextEntry
       />
+
       <View style={styles.forgotPassword}>
         <TouchableOpacity
           onPress={() => navigation.navigate('ResetPasswordScreen')}
@@ -94,3 +84,8 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
   },
 })
+
+const mapDispatchToProps = (dispatch) =>
+  bindActionCreators({ loginFunc: login }, dispatch)
+
+export default connect(null, mapDispatchToProps)(LoginScreen)

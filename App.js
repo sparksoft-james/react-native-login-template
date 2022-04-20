@@ -1,49 +1,28 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { Provider as StoreProvider } from 'react-redux'
 import { Provider } from 'react-native-paper'
 import { NavigationContainer } from '@react-navigation/native'
-import { createStackNavigator } from '@react-navigation/stack'
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-
+import BottomTabNav from './src/navigation/BottomTabNav'
 import { theme } from './src/core/theme'
-import {
-  StartScreen,
-  LoginScreen,
-  RegisterScreen,
-  ResetPasswordScreen,
-  Dashboard,
-} from './src/screens'
+import AuthStack from './src/navigation/AuthStack'
+import Entry from './src/navigation/Entry'
 
-const Stack = createStackNavigator()
+// eslint-disable-next-line import/no-cycle
+import createStore from './src/store'
+
+export const { store, persistor } = createStore()
 
 export default function App() {
-  const Tab = createBottomTabNavigator()
-
-  function MyTabs() {
-    return (
-      <Tab.Navigator>
-        <Tab.Screen name="Home" component={Dashboard} />
-      </Tab.Navigator>
-    )
-  }
+  const [showNav, setShowNav] = useState(false)
 
   return (
     <Provider theme={theme}>
       <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="StartScreen"
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="StartScreen" component={StartScreen} />
-          <Stack.Screen name="LoginScreen" component={LoginScreen} />
-          <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
-          <Stack.Screen name="Dashboard" component={Dashboard} />
-          <Stack.Screen
-            name="ResetPasswordScreen"
-            component={ResetPasswordScreen}
-          />
-        </Stack.Navigator>
+        <StoreProvider store={store}>
+          {/* {console.log('current token', store.getState().user.api_token)} */}
+          {/* {store.getState().user.api_token ? <BottomTabNav /> : <AuthStack />} */}
+          <Entry />
+        </StoreProvider>
       </NavigationContainer>
     </Provider>
   )

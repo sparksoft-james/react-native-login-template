@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { View, StyleSheet, TouchableOpacity } from 'react-native'
 import { Text } from 'react-native-paper'
-import Background from '../components/Background'
+import Background from '../components/LoginBackground'
 import Logo from '../components/Logo'
 import Header from '../components/Header'
 import Button from '../components/Button'
@@ -29,7 +29,7 @@ export default function RegisterScreen({ navigation }) {
     }
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Dashboard' }],
+      routes: [{ name: 'Collection' }],
     })
   }
 

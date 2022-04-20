@@ -1,8 +1,9 @@
 import React from 'react'
 import { ImageBackground, StyleSheet, KeyboardAvoidingView } from 'react-native'
+import { Text } from 'react-native-elements'
 import { theme } from '../core/theme'
 
-export default function Background({ children }) {
+export default function LoginBackground({ children }) {
   return (
     <ImageBackground
       source={require('../assets/background_dot.png')}
@@ -24,6 +25,8 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 20,
     width: '100%',
   },

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Simple Login Template",
-    "slug": "simple-login-template",
+    "name": "Collect Co",
+    "slug": "collect-co",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -24,10 +24,27 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
       "package": "com.login"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     }
-  }
+  },
+  "ios": {
+    "usesIcloudStorage": true,
+    "bundleIdentifier": "com.yourname.yourapp"
+  },
+  "plugins": [
+    [
+      "expo-document-picker",
+      {
+        "appleTeamId": "YOUR_TEAM_ID"
+      }
+    ]
+  ]
 }

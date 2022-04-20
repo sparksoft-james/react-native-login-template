@@ -2,23 +2,23 @@ import React from 'react'
 import { View, StyleSheet, TouchableOpacity } from 'react-native'
 import { Text, Colors } from 'react-native-paper'
 import Icon from 'react-native-vector-icons/FontAwesome'
-import { primary } from '~/Utils/customTheme'
+import { theme } from '../../core/theme'
 
 export default function CustomTabBar({ state, navigation }) {
   const { routes } = state
-  let image = 'home' //require('../../assets/report.png');
+  // let image = 'home' //require('../../assets/report.png');
 
   const tabBar = routes.map((route, index) => {
     const isFocused = state.index === index
-
-    if (route.name === 'Clients') {
-      image = 'users' //require('../../assets/clients.png');
-    } else if (route.name === 'Plans') {
-      image = 'list' //require('../../assets/plans.png');
-    } else if (route.name === 'Report') {
-      image = 'file-text' //require('../../assets/plans.png');
+    let image = 'home'
+    if (route.name === 'Collection') {
+      image = 'home'
+    } else if (route.name === 'Message') {
+      image = 'comment'
+    } else if (route.name === 'Trade') {
+      image = 'exchange'
     } else if (route.name === 'Profile') {
-      image = 'user' //require('../../assets/profile.png');
+      image = 'user'
     }
 
     const onPress = () => {
@@ -39,7 +39,6 @@ export default function CustomTabBar({ state, navigation }) {
       })
     }
 
-    const labelColor = { color: isFocused ? primary : '#222' }
     const imageColor = isFocused ? styles.activeImage : styles.incativeState
 
     return (
@@ -52,7 +51,7 @@ export default function CustomTabBar({ state, navigation }) {
         style={styles.tabbarButton}
       >
         <Icon name={image} size={25} style={[styles.image, imageColor]} />
-        <Text style={labelColor}>{route.name}</Text>
+        <Text style={styles.label}>{route.name}</Text>
       </TouchableOpacity>
     )
   })
@@ -67,23 +66,22 @@ export default function CustomTabBar({ state, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    paddingVertical: 15,
-    shadowColor: Colors.grey400,
-    shadowOffset: { height: 3, width: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
+    paddingVertical: 25,
     backgroundColor: Colors.white,
+    borderTopWidth: 0.5,
+    borderTopColor: theme.colors.primary,
+  },
+  label: {
+    fontSize: theme.fontSize.paragraph,
   },
   image: {
-    // height: 20,
-    // width: 20,
     marginBottom: 5,
   },
   activeImage: {
-    color: primary,
+    color: Colors.black,
   },
   incativeState: {
-    color: '#808080',
+    color: theme.colors.primary,
   },
   tabbarButton: {
     flex: 1,
