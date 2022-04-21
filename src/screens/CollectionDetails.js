@@ -8,6 +8,8 @@ import {
 import { connect } from 'react-redux'
 
 import { Avatar, ListItem } from 'react-native-elements'
+import * as FileSystem from 'expo-file-system'
+import { showToast } from '../utils/function'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { scale } from 'react-native-size-matters'
 import { theme } from '../core/theme'
@@ -21,20 +23,41 @@ function CollectionDetails({ route, navigation, collection }) {
 
   useEffect(() => {
     if (title === BOOKS && collection.book && collection.book.length > 0) {
-      setData(collection.book[0].collections)
+      setData(collection.book)
     }
     if (title === IMAGES && collection.image && collection.image.length > 0) {
-      setData(collection.image[0].collections)
+      setData(collection.image)
     }
     if (title === MUSICS && collection.music && collection.music.length > 0) {
-      setData(collection.music[0].collections)
+      setData(collection.music)
     }
   }, [])
+
+  const downloadFile = (uri) => {
+    const path = uri.split('/')
+    const file_name = path[path.length - 1]
+    const fileUri = FileSystem.documentDirectory + file_name
+    FileSystem.downloadAsync(uri, fileUri)
+      .then(({ res }) => {
+        showToast(res)
+      })
+      .catch((error) => {
+        showToast(error)
+      })
+  }
+
+  // const saveFile = async (fileUri) => {
+  //   const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL)
+  //   if (status === 'granted') {
+  //     const asset = await MediaLibrary.createAssetAsync(fileUri)
+  //     await MediaLibrary.createAlbumAsync('Download', asset, false)
+  //   }
+  // }
 
   const keyExtractor = (item, index) => index.toString()
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity>
+    <TouchableOpacity onPress={() => downloadFile(item.download_url)}>
       <ListItem containerStyle={styles.itemListItem} bottomDivider>
         <Avatar source={{ uri: item.thumbnail_url }} size={scale(50)} />
         <ListItem.Content>
@@ -43,7 +66,9 @@ function CollectionDetails({ route, navigation, collection }) {
             {item.description}
           </ListItem.Subtitle>
         </ListItem.Content>
-        <ListItem.Chevron />
+        <ListItem.Chevron
+          iconProps={{ size: scale(15), name: 'file-download' }}
+        />
       </ListItem>
     </TouchableOpacity>
   )

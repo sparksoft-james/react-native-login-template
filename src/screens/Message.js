@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Avatar, Input, ListItem } from 'react-native-elements'
-import {
-  StyleSheet,
-  ScrollView,
-  FlatList,
-  TouchableOpacity,
-} from 'react-native'
+import { StyleSheet, FlatList, TouchableOpacity } from 'react-native'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { scale } from 'react-native-size-matters'
@@ -14,33 +9,9 @@ import Background from '../components/Background'
 import { theme } from '../core/theme'
 import Header from '../components/Header'
 
-function Message({ navigation, getUserFunc, chat }) {
-  const [data, setData] = useState([
-    {
-      id: 1,
-      name: 'Amy Farha',
-      avatar_url:
-        'https://cms.qz.com/wp-content/uploads/2022/04/ElonMuskTwitter.jpg?quality=75&strip=all&w=410&h=231',
-      subtitle: 'Vice President',
-    },
-    {
-      id: 2,
-      name: 'Chris Jackson',
-      avatar_url:
-        'https://cms.qz.com/wp-content/uploads/2022/04/ElonMuskTwitter.jpg?quality=75&strip=all&w=410&h=231',
-      subtitle: 'Vice Chairman',
-    },
-    {
-      id: 3,
-      name: 'JB Jackson',
-      avatar_url:
-        'https://cms.qz.com/wp-content/uploads/2022/04/ElonMuskTwitter.jpg?quality=75&strip=all&w=410&h=231',
-      subtitle: 'Vice Chairman',
-    },
-  ])
-
+function Message({ navigation, getUserFunc, chat, user }) {
   useEffect(() => {
-    getUserFunc()
+    getUserFunc(user.id)
   }, [])
 
   const keyExtractor = (item, index) => index.toString()

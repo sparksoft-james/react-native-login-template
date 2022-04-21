@@ -18,13 +18,12 @@ export default function Header(props) {
       <TouchableOpacity>
         {/* eslint-disable-next-line react/destructuring-assignment */}
         {view && (
-          <Text
-            style={styles.icon}
-            // eslint-disable-next-line react/destructuring-assignment
+          <IconButton
+            size={theme.fontSize.icon}
+            color={theme.colors.primary}
             onPress={() => navigation.navigate(route, { title })}
-          >
-            View More
-          </Text>
+            icon="more"
+          />
         )}
         {create && (
           <IconButton
@@ -47,7 +46,7 @@ const styles = StyleSheet.create({
   icon: {
     fontSize: theme.fontSize.paragraph,
     color: theme.colors.primary,
-    fontStyle: 'italic',
+    // fontStyle: 'italic',
   },
   headerContainer: {
     flexDirection: 'row',

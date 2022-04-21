@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import React, { useEffect, useState } from 'react'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, ScrollView } from 'react-native'
 import { bindActionCreators } from 'redux'
 import {
   BOOKS,
@@ -13,6 +13,8 @@ import {
 import Background from '../components/Background'
 import ColelctionItem from '../components/collection/CollectionItem'
 import { getCollection } from '../redux/collection/collection.action'
+import { theme } from '../core/theme'
+// import { ScrollView } from 'react-native-gesture-handler'
 
 function Collection(props) {
   const { navigation, collection, user, getCollectionFunc } = props
@@ -23,12 +25,12 @@ function Collection(props) {
   }, [])
 
   return (
-    <Background>
+    <ScrollView style={styles.container}>
       <ColelctionItem
         title={BOOKS}
         data={
           collection.book && collection.book.length > 0
-            ? collection.book[0].collections.slice(0, 3)
+            ? collection.book.slice(0, 5)
             : []
         }
         navigation={navigation}
@@ -39,7 +41,7 @@ function Collection(props) {
         title={IMAGES}
         data={
           collection.image && collection.image.length > 0
-            ? collection.image[0].collections.slice(0, 3)
+            ? collection.image.slice(0, 5)
             : []
         }
         navigation={navigation}
@@ -50,18 +52,23 @@ function Collection(props) {
         title={MUSICS}
         data={
           collection.music && collection.music.length > 0
-            ? collection.music[0].collections.slice(0, 3)
+            ? collection.music.slice(0, 5)
             : []
         }
         navigation={navigation}
         route="CollectionDetails"
         view
       />
-    </Background>
+    </ScrollView>
   )
 }
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+    backgroundColor: theme.colors.white,
+  },
+})
 
 const mapStateToProps = (state) => ({
   collection: state.collection,

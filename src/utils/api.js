@@ -80,10 +80,33 @@ export const request = {
     headers = {
       ...headers,
     }
-    // }
 
     logDev(path, body, headers)
 
+    return timeout(
+      fetch(`${BASE_URL}${path}`, {
+        method: 'POST',
+        headers: {
+          ...headers,
+          ...opts,
+        },
+        body,
+      }).then((res) => toJson(res))
+    )
+  },
+  postFormData: (path, body = {}, opts = {}) => {
+    // if (store.getState().user.api_token) {
+    headers = {
+      ...headers,
+    }
+    // }
+    const data = new FormData()
+    headers = { 'Content-Type': 'multipart/form-data' }
+    Object.keys(body).forEach((key) => {
+      data.append(key, body[key])
+    })
+    body = data
+    logDev(path, body, headers)
     return timeout(
       fetch(`${BASE_URL}${path}`, {
         method: 'POST',

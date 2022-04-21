@@ -1,111 +1,108 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 // import Permissions from 'react-native-permissions'
 import {
-  Alert,
   Platform,
   PermissionsAndroid,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native'
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import * as ImagePicker from 'expo-image-picker'
-import * as DocumentPicker from 'expo-document-picker'
-// import DocumentPicker from 'react-native-document-picker'
-import { Button, Input, Text } from 'react-native-elements'
 import { scale } from 'react-native-size-matters'
+import { Button, ButtonGroup, Input, Text } from 'react-native-elements'
+import * as DocumentPicker from 'expo-document-picker'
+import { postCollection } from '../redux/collection/collection.action'
+// import DocumentPicker from 'react-native-document-picker'
 import { theme } from '../core/theme'
-import { BOOKS, IMAGES, MUSICS } from '../utils/constant'
+import {
+  BOOKS,
+  IMAGES,
+  MUSICS,
+  BOOK_TYPE,
+  IMAGE_TYPE,
+  MUSIC_TYPE,
+} from '../utils/constant'
 import Background from '../components/Background'
 import Header from '../components/Header'
 
-export default function CollectionCreate({ route, navigation }) {
+function CollectionCreate({ route, navigation, user, postCollectionFunc }) {
   const { title = null } = route.params
   const [name, setName] = useState()
   const [description, setDescription] = useState()
   const [thumbnail, setThumbnail] = useState()
   const [file, setFile] = useState()
+  const [collectionType, setCollectionType] = useState(1)
+  const [collectionTypeId, setCollectionTypeId] = useState()
 
-  const uploadItem = (type) => {
-    if (title === BOOKS || title === MUSICS) {
-      // openDocument()
-    } else {
-      openGallery(type)
+  const assignType = () => {
+    if (title === BOOKS) {
+      setCollectionTypeId(BOOK_TYPE)
     }
+    if (title === IMAGES) {
+      setCollectionTypeId(IMAGE_TYPE)
+    }
+    if (title === MUSICS) {
+      setCollectionTypeId(MUSIC_TYPE)
+    }
+  }
+  useEffect(() => {
+    assignType()
+  }, [])
+
+  const submit = () => {
+    let condition_type = 'used'
+    if (collectionType === 1) {
+      condition_type = 'used'
+    } else if (collectionType === 0) {
+      condition_type = 'new'
+    }
+    const payload = {
+      collection_type_id: collectionTypeId,
+      collector_id: user.id,
+      name,
+      description,
+      condition_type,
+      thumbnail,
+      file,
+    }
+    postCollectionFunc(payload)
   }
 
   async function openGallery(type) {
-    const response = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
+    const result = await DocumentPicker.getDocumentAsync({
+      copyToCacheDirectory: true,
+      multiple: false,
+      type: 'image/*',
     })
-
-    if (response) {
-      if (response.uri) {
-        console.log(response)
-        if (type === 'thumb') {
-          setThumbnail({
-            type: response.type,
-            uri: response.uri,
-          })
-        }
-        if (type === 'file') {
-          setFile({
-            type: response.type,
-            uri: response.uri,
-          })
-        }
-      }
+    if (result) {
+      processFile(result, setThumbnail)
     }
   }
 
-  const permission = () => {
+  const pickDoc = () => {
     if (Platform.OS === 'android') {
       PermissionsAndroid.requestMultiple([
         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
         PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
       ]).then(async (res) => {
-        console.log(res)
-        // if (
-        //   res['android.permission.READ_EXTERNAL_STORAGE'] === 'granted' &&
-        //   res['android.permission.WRITE_EXTERNAL_STORAGE'] === 'granted'
-        // ) {
         const result = await DocumentPicker.getDocumentAsync({
           copyToCacheDirectory: true,
           multiple: false,
           type: '*/*',
         })
-        console.log(result)
-        setFile({
-          type: result.type,
-          uri: result.uri,
-        })
-        // }
+        if (result) {
+          console.log(result)
+          processFile(result, setFile)
+        }
       })
     }
   }
-  const pickDocument = async () => {
-    // const res = await DocumentPicker.pick({
-    //   type: [DocumentPicker.types.pdf],
-    // })
-    const result = await DocumentPicker.getDocumentAsync({
-      copyToCacheDirectory: true,
-      multiple: false,
-      type: ['*/*'],
-    })
-    console.log(result)
-    setFile({
-      type: result.type,
-      uri: result.uri,
-    })
+
+  const processFile = async (result, setItem) => {
+    setItem({ uri: result.uri, name: result.name, type: result.mimeType })
   }
-
-  const component1 = () => <Text>New</Text>
-  const component2 = () => <Text>Used</Text>
-
-  const buttons = [{ element: component1 }, { element: component2 }]
 
   return (
     <Background>
@@ -116,20 +113,9 @@ export default function CollectionCreate({ route, navigation }) {
           placeholder="Description"
           onChangeText={(value) => setDescription(value)}
         />
-        {/* <Input
-          placeholder="File Type"
-          // onChangeText={(value) => this.setState({ comment: value })}
-        /> */}
-        {/* <Input
-          placeholder="Upload File"
-          value={file && file.uri ? file.uri : ''}
-          onPress={() => openGallery('file')}
-          // onChangeText={(value) => this.setState({ comment: value })}
-        /> */}
-
         <TouchableOpacity
           style={[styles.uploadBox, file && styles.greenBorder]}
-          onPress={() => permission()}
+          onPress={() => pickDoc()}
         >
           <MaterialIcons
             name={file ? 'cloud-done' : 'cloud-upload'}
@@ -138,8 +124,8 @@ export default function CollectionCreate({ route, navigation }) {
             color={file ? theme.colors.success : theme.colors.primary}
           />
           <Text style={styles.uploadTitle}>
-            {file && file.uri && file.uri.length > 0
-              ? `...${file.uri.substring(0, 50)}`
+            {file && file.name && file.name.length > 0
+              ? `${file.name.substring(0, 50)}`
               : 'Upload file'}
           </Text>
         </TouchableOpacity>
@@ -155,21 +141,26 @@ export default function CollectionCreate({ route, navigation }) {
             color={thumbnail ? theme.colors.success : theme.colors.primary}
           />
           <Text style={styles.uploadTitle}>
-            {thumbnail && thumbnail.uri && thumbnail.uri.length > 0
-              ? `...${thumbnail.uri.substring(0, 50)}`
+            {thumbnail && thumbnail.name && thumbnail.name.length > 0
+              ? `${thumbnail.name.substring(0, 50)}`
               : 'Upload thumbnail'}
           </Text>
         </TouchableOpacity>
-        {/* 
+        <Text>{}</Text>
         <ButtonGroup
-          onPress={this.updateIndex}
-          selectedIndex={selectedIndex}
-          buttons={buttons}
-          containerStyle={{ height: 100 }}
-        /> */}
+          // onPress={(val) => updateIndex(val)}
+          onPress={(value) => {
+            setCollectionType(value)
+          }}
+          buttons={['Used', 'New']}
+          selectedIndex={collectionType}
+          selectedButtonStyle={{ backgroundColor: theme.colors.primary }}
+          containerStyle={{ height: 50 }}
+        />
 
         <Button
           title="Submit"
+          onPress={submit}
           buttonStyle={{
             backgroundColor: theme.colors.text,
             borderRadius: 5,
@@ -195,7 +186,7 @@ const styles = StyleSheet.create({
     marginTop: scale(10),
   },
   uploadBox: {
-    height: 175,
+    height: 120,
     width: 275,
     marginVertical: scale(5),
     justifyContent: 'center',
@@ -216,3 +207,12 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.green300,
   },
 })
+
+const mapStateToProps = (state) => ({
+  user: state.user,
+})
+
+const mapDispatchToProps = (dispatch) =>
+  bindActionCreators({ postCollectionFunc: postCollection }, dispatch)
+
+export default connect(mapStateToProps, mapDispatchToProps)(CollectionCreate)

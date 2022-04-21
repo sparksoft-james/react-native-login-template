@@ -24,9 +24,8 @@ export default function ColelctionItem(props) {
                   uri: item.thumbnail_url,
                 }}
               />
-              <Text style={({ marginBottom: 10 }, styles.cardTitle)}>
-                {item.name}
-              </Text>
+              <Text style={styles.cardTitle}>{item.name}</Text>
+              <Text style={styles.cardDescription}>{item.description}</Text>
             </Card>
           ))
         ) : (
@@ -55,6 +54,11 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.subtitle,
     fontWeight: 'bold',
     marginVertical: scale(10),
+  },
+  cardDescription: {
+    fontSize: theme.fontSize.paragraph,
+    // fontWeight: 'bold',
+    marginVertical: scale(4),
   },
   collectionContainer: {
     width: '100%',
