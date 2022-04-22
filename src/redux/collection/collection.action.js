@@ -1,3 +1,4 @@
+import { Alert } from 'react-native'
 import { actions } from '../../store/utils'
 // eslint-disable-next-line import/no-cycle
 import { request } from '../../utils/api'
@@ -47,8 +48,13 @@ export const postCollection = (payload) => async (dispatch) => {
     dispatch({
       type: COLLECTION.SUCCESS,
     })
-    console.log('weeee', res)
-    showToast(res.responseMessage)
+    if (res && res.responseCode === 0) {
+      Alert.alert('Create Success', res.responseMessage, [
+        {
+          text: 'OK',
+        },
+      ])
+    }
     getCollection()
   }
 }

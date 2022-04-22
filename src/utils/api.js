@@ -12,25 +12,23 @@ export const BASE_URL = 'https://collectco.xyz/api'
 const ERROR_RESPONSE_CODE = 1
 export const SUCCESS_RESPONSE_CODE = 0
 
-let promptAlert = false
-
 const toJson = async (res) => {
   if (res) {
     const resJson = await res.json()
 
     logDev(resJson)
 
-    const { data, responseCode, responseMessage } = resJson
+    const { data, responseCode, responseMessage = null } = resJson
     if (responseCode === ERROR_RESPONSE_CODE) {
-      if (!promptAlert) {
-        promptAlert = true
-
-        Alert.alert('Error', responseMessage, [
+      Alert.alert(
+        'Error',
+        typeof responseMessage !== 'object' ? responseMessage : 'Server Error',
+        [
           {
             text: 'OK',
           },
-        ])
-      }
+        ]
+      )
     }
 
     return resJson
@@ -76,7 +74,6 @@ export const request = {
     )
   },
   post: (path, body = {}, opts = {}) => {
-    // if (store.getState().user.api_token) {
     headers = {
       ...headers,
     }
@@ -94,12 +91,11 @@ export const request = {
       }).then((res) => toJson(res))
     )
   },
+
   postFormData: (path, body = {}, opts = {}) => {
-    // if (store.getState().user.api_token) {
     headers = {
       ...headers,
     }
-    // }
     const data = new FormData()
     headers = { 'Content-Type': 'multipart/form-data' }
     Object.keys(body).forEach((key) => {

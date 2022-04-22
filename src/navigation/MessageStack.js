@@ -1,6 +1,10 @@
 import React from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
-import { MessageScreen, MesaageDetailsScreen } from '../screens'
+import {
+  MessageScreen,
+  MesaageDetailsScreen,
+  TradeCreateScreen,
+} from '../screens'
 
 const Stack = createStackNavigator()
 
@@ -14,6 +18,7 @@ export default function MessageStack() {
     >
       <Stack.Screen name="Message" component={MessageScreen} />
       <Stack.Screen name="MessageDetails" component={MesaageDetailsScreen} />
+      <Stack.Screen name="TradeCreate" component={TradeCreateScreen} />
     </Stack.Navigator>
   )
 }

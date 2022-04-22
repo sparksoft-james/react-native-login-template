@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
@@ -20,6 +21,8 @@ import {
   BOOKS,
   IMAGES,
   MUSICS,
+  FILES,
+  FILE_TYPE,
   BOOK_TYPE,
   IMAGE_TYPE,
   MUSIC_TYPE,
@@ -39,6 +42,9 @@ function CollectionCreate({ route, navigation, user, postCollectionFunc }) {
   const assignType = () => {
     if (title === BOOKS) {
       setCollectionTypeId(BOOK_TYPE)
+    }
+    if (title === FILES) {
+      setCollectionTypeId(FILE_TYPE)
     }
     if (title === IMAGES) {
       setCollectionTypeId(IMAGE_TYPE)

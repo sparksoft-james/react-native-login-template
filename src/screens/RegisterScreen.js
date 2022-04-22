@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native'
 import { Text } from 'react-native-paper'
 import Background from '../components/LoginBackground'
 import Logo from '../components/Logo'
@@ -7,30 +7,27 @@ import Header from '../components/Header'
 import Button from '../components/Button'
 import TextInput from '../components/TextInput'
 import BackButton from '../components/BackButton'
+import { request } from '../utils/api'
+import { showToast } from '../utils/function'
 import { theme } from '../core/theme'
-import { emailValidator } from '../helpers/emailValidator'
-import { passwordValidator } from '../helpers/passwordValidator'
-import { nameValidator } from '../helpers/nameValidator'
 
 export default function RegisterScreen({ navigation }) {
-  const [name, setName] = useState({ value: '', error: '' })
-  const [email, setEmail] = useState({ value: '', error: '' })
-  const [password, setPassword] = useState({ value: '', error: '' })
+  const [username, setUsername] = useState()
+  const [password, setPassword] = useState()
+  const [name, setName] = useState()
+  const [email, setEmail] = useState()
 
-  const onSignUpPressed = () => {
-    const nameError = nameValidator(name.value)
-    const emailError = emailValidator(email.value)
-    const passwordError = passwordValidator(password.value)
-    if (emailError || passwordError || nameError) {
-      setName({ ...name, error: nameError })
-      setEmail({ ...email, error: emailError })
-      setPassword({ ...password, error: passwordError })
-      return
+  const onSignUpPressed = async () => {
+    const payload = { username, password, name, email }
+    console.log(payload, 'sdsdsd')
+    const res = await request.postFormData('/users/register', payload)
+    if (res && res.responseCode === 0) {
+      Alert.alert('Register Success', res.responseMessage, [
+        {
+          text: 'OK',
+        },
+      ])
     }
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Collection' }],
-    })
   }
 
   return (
@@ -41,18 +38,20 @@ export default function RegisterScreen({ navigation }) {
       <TextInput
         label="Name"
         returnKeyType="next"
-        value={name.value}
-        onChangeText={(text) => setName({ value: text, error: '' })}
-        error={!!name.error}
-        errorText={name.error}
+        value={name}
+        onChangeText={(text) => setName(text)}
+      />
+      <TextInput
+        label="Username"
+        returnKeyType="next"
+        value={username}
+        onChangeText={(text) => setUsername(text)}
       />
       <TextInput
         label="Email"
         returnKeyType="next"
-        value={email.value}
-        onChangeText={(text) => setEmail({ value: text, error: '' })}
-        error={!!email.error}
-        errorText={email.error}
+        value={email}
+        onChangeText={(text) => setEmail(text)}
         autoCapitalize="none"
         autoCompleteType="email"
         textContentType="emailAddress"
@@ -61,10 +60,8 @@ export default function RegisterScreen({ navigation }) {
       <TextInput
         label="Password"
         returnKeyType="done"
-        value={password.value}
-        onChangeText={(text) => setPassword({ value: text, error: '' })}
-        error={!!password.error}
-        errorText={password.error}
+        value={password}
+        onChangeText={(text) => setPassword(text)}
         secureTextEntry
       />
       <Button

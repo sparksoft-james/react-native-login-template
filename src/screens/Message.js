@@ -12,16 +12,20 @@ import Header from '../components/Header'
 function Message({ navigation, getUserFunc, chat, user }) {
   useEffect(() => {
     getUserFunc(user.id)
+    setData(chat.user)
   }, [])
+
+  const [data, setData] = useState([])
 
   const keyExtractor = (item, index) => index.toString()
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
+      key={item.id}
       onPress={() => navigation.navigate('MessageDetails', { item })}
     >
       <ListItem containerStyle={styles.chatListItem} bottomDivider>
-        <Avatar rounded source={{ uri: item.avatar_url }} size={50} />
+        {/* <Avatar rounded source={{ uri: item.avatar_url }} size={50} /> */}
         <ListItem.Content>
           <ListItem.Title style={styles.chatName}>
             {item.username}
@@ -37,10 +41,20 @@ function Message({ navigation, getUserFunc, chat, user }) {
   return (
     <Background>
       <Header title="Chats" />
-      <Input placeholder="Search User Name" style={styles.searchBox} />
+      <Input
+        placeholder="Search User Name"
+        style={styles.searchBox}
+        onChangeText={(val) => {
+          setData(
+            chat.user.length > 0
+              ? chat.user.filter((item) => item.username.includes(val))
+              : []
+          )
+        }}
+      />
       <FlatList
         keyExtractor={keyExtractor}
-        data={chat.user && chat.user.length > 0 ? chat.user : []}
+        data={data && data.length > 0 ? data : chat.user}
         renderItem={renderItem}
       />
     </Background>

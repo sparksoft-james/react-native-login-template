@@ -6,11 +6,12 @@ import {
   BOOKS,
   IMAGES,
   MUSICS,
+  FILES,
   BOOK_TYPE,
   MUSIC_TYPE,
   IMAGE_TYPE,
+  FILE_TYPE,
 } from '../utils/constant'
-import Background from '../components/Background'
 import ColelctionItem from '../components/collection/CollectionItem'
 import { getCollection } from '../redux/collection/collection.action'
 import { theme } from '../core/theme'
@@ -22,6 +23,7 @@ function Collection(props) {
     getCollectionFunc(user.id, BOOK_TYPE)
     getCollectionFunc(user.id, MUSIC_TYPE)
     getCollectionFunc(user.id, IMAGE_TYPE)
+    getCollectionFunc(user.id, FILE_TYPE)
   }, [])
 
   return (
@@ -36,6 +38,7 @@ function Collection(props) {
         navigation={navigation}
         route="CollectionDetails"
         view
+        header
       />
       <ColelctionItem
         title={IMAGES}
@@ -47,6 +50,7 @@ function Collection(props) {
         navigation={navigation}
         route="CollectionDetails"
         view
+        header
       />
       <ColelctionItem
         title={MUSICS}
@@ -58,6 +62,19 @@ function Collection(props) {
         navigation={navigation}
         route="CollectionDetails"
         view
+        header
+      />
+      <ColelctionItem
+        title={FILES}
+        data={
+          collection.file && collection.file.length > 0
+            ? collection.file.slice(0, 5)
+            : []
+        }
+        navigation={navigation}
+        route="CollectionDetails"
+        view
+        header
       />
     </ScrollView>
   )

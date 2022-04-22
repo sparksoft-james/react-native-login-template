@@ -1,9 +1,15 @@
 import { COLLECTION } from './collection.action'
-import { BOOK_TYPE, MUSIC_TYPE, IMAGE_TYPE } from '../../utils/constant'
+import {
+  BOOK_TYPE,
+  MUSIC_TYPE,
+  IMAGE_TYPE,
+  FILE_TYPE,
+} from '../../utils/constant'
 
 const initialState = {
   book: null,
   music: null,
+  file: null,
   image: null,
   fetching: false,
 }
@@ -18,6 +24,14 @@ export default (state = initialState, action = {}) => {
         return {
           ...state,
           book: action.payload,
+          fetching: false,
+          error: '',
+        }
+      }
+      if (action.data_type === FILE_TYPE) {
+        return {
+          ...state,
+          file: action.payload,
           fetching: false,
           error: '',
         }

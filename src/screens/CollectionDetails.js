@@ -9,9 +9,8 @@ import { connect } from 'react-redux'
 
 import { Avatar, ListItem } from 'react-native-elements'
 import * as FileSystem from 'expo-file-system'
-import { showToast } from '../utils/function'
-import Icon from 'react-native-vector-icons/FontAwesome'
 import { scale } from 'react-native-size-matters'
+import { showToast } from '../utils/function'
 import { theme } from '../core/theme'
 import { BOOKS, IMAGES, MUSICS } from '../utils/constant'
 import Background from '../components/Background'
@@ -38,21 +37,13 @@ function CollectionDetails({ route, navigation, collection }) {
     const file_name = path[path.length - 1]
     const fileUri = FileSystem.documentDirectory + file_name
     FileSystem.downloadAsync(uri, fileUri)
-      .then(({ res }) => {
-        showToast(res)
+      .then((res) => {
+        console.log(res)
       })
       .catch((error) => {
-        showToast(error)
+        console.log(error)
       })
   }
-
-  // const saveFile = async (fileUri) => {
-  //   const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL)
-  //   if (status === 'granted') {
-  //     const asset = await MediaLibrary.createAssetAsync(fileUri)
-  //     await MediaLibrary.createAlbumAsync('Download', asset, false)
-  //   }
-  // }
 
   const keyExtractor = (item, index) => index.toString()
 
@@ -64,6 +55,10 @@ function CollectionDetails({ route, navigation, collection }) {
           <ListItem.Title style={styles.itemName}>{item.name}</ListItem.Title>
           <ListItem.Subtitle style={styles.itemDesc}>
             {item.description}
+          </ListItem.Subtitle>
+          {console.log(item)}
+          <ListItem.Subtitle style={styles.itemDesc}>
+            {item.condition_type}
           </ListItem.Subtitle>
         </ListItem.Content>
         <ListItem.Chevron

@@ -8,6 +8,7 @@ export default function Header(props) {
   const {
     title,
     navigation = null,
+    item = null,
     route = null,
     view = false,
     create = false,
@@ -28,7 +29,7 @@ export default function Header(props) {
         {create && (
           <IconButton
             size={theme.fontSize.icon}
-            onPress={() => navigation.navigate(route, { title })}
+            onPress={() => navigation.navigate(route, { title, item })}
             icon="plus"
           />
         )}
