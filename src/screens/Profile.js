@@ -18,7 +18,6 @@ function Profile(props) {
   }
   return (
     <Background>
-      {console.log(user)}
       <Header title={user.name} />
       <Text style={styles.label}>Email: {user.email}</Text>
       <Text style={styles.label}>Username: {user.username}</Text>

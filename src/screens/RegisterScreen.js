@@ -19,7 +19,6 @@ export default function RegisterScreen({ navigation }) {
 
   const onSignUpPressed = async () => {
     const payload = { username, password, name, email }
-    console.log(payload, 'sdsdsd')
     const res = await request.postFormData('/users/register', payload)
     if (res && res.responseCode === 0) {
       Alert.alert('Register Success', res.responseMessage, [

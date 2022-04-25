@@ -48,7 +48,6 @@ function Trade({ navigation, user }) {
   const renderItem = ({ item }) => (
     <TouchableOpacity>
       <ListItem containerStyle={styles.itemListItem} bottomDivider>
-        {console.log(item)}
         {/* <Avatar source={{ uri: item.avatar }} size={scale(50)} /> */}
         <ListItem.Content>
           <ListItem.Title style={styles.itemName}>

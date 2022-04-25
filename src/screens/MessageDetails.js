@@ -1,9 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux'
-import { Avatar, Input, ListItem, Text } from 'react-native-elements'
-import Icon from 'react-native-vector-icons/FontAwesome'
-
 import {
   StyleSheet,
   ScrollView,
@@ -11,7 +6,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
+import { Avatar, Input, ListItem, Text } from 'react-native-elements'
+import Icon from 'react-native-vector-icons/FontAwesome'
+import Pusher from 'pusher-js/react-native'
 import { scale } from 'react-native-size-matters'
+import Echo from 'laravel-echo'
+import pusherConfig from '../utils/pusher.json'
+
 import Background from '../components/Background'
 import { theme } from '../core/theme'
 import Header from '../components/Header'
@@ -20,28 +23,47 @@ import { request } from '../utils/api'
 function MessageDetails({ route, navigation, user }) {
   const { item } = route.params
 
+  const [scrollView, setScrollView] = useState()
+  const [channel, setChannel] = useState()
   const [message, setMessage] = useState()
   const [messageText, setMessageText] = useState()
+  const [init, setInit] = useState(true)
+  const [currentId, setCurrentId] = useState(true)
 
-  const delay = (ms) => new Promise((res) => setTimeout(res, ms))
   useEffect(async () => {
-    await delay(5000)
-    refreshMessage()
-  }, [true])
+    // await delay(2000)
+    await getChannelId()
+    const pusher = new Pusher(pusherConfig.key, pusherConfig)
+    const chatChannel = pusher.subscribe('channel_' + channel)
 
-  const refreshMessage = async () => {
+    chatChannel.bind('SendMessage', (data) => {
+      if (message) {
+        const index = message.findIndex((m) => m.id === data.message.id)
+        if (index < 0) {
+          setMessage((previousMessages) => [...previousMessages, data.message])
+          console.log('newMessage xxxx', message)
+        }
+      }
+    })
+  }, [])
+
+  const getChannelId = async () => {
     const URL = `/chat/getMessage?user_id=${user.id}&target_user_id=${item.id}`
     const res = await request.get(URL)
     if (res.data) {
-      setMessage(res.data)
+      setChannel(res.data.channel_id)
+      if (init) {
+        setMessage(res.data.messages)
+        setInit(false)
+      }
     }
   }
 
   const sendMessage = async () => {
-    const URL = `/chat/send?from_id=${user.id}&to_id=${item.id}&message=${messageText}&channel_id=${message.channel_id}`
+    console.log(URL, 'url')
+    const URL = `/chat/send?from_id=${user.id}&to_id=${item.id}&message=${messageText}&channel_id=${channel}`
     await request.post(URL)
     setMessageText('')
-    refreshMessage()
   }
 
   return (
@@ -53,10 +75,15 @@ function MessageDetails({ route, navigation, user }) {
         route="TradeCreate"
         create
       />
-      <ScrollView style={styles.mainContainer}>
+      <ScrollView
+        style={styles.mainContainer}
+        ref={(ref) => {
+          setScrollView(ref)
+        }}
+        onContentSizeChange={() => scrollView.scrollToEnd({ animated: true })}
+      >
         {message &&
-          message.messages &&
-          message.messages.map((chat, index) => (
+          message.map((chat, index) => (
             <View
               key={index}
               style={
@@ -106,6 +133,7 @@ const styles = StyleSheet.create({
   chatItemLeftContainer: {
     width: 'auto',
     flexDirection: 'column',
+    alignSelf: 'flex-start',
   },
   chatItemText: {
     paddingHorizontal: scale(10),

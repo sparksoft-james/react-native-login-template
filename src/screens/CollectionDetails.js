@@ -1,14 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import {
   FlatList,
+  PermissionsAndroid,
+  Platform,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
 } from 'react-native'
+import * as Linking from 'expo-linking'
+import CameraRoll from '@react-native-community/cameraroll'
 import { connect } from 'react-redux'
 
 import { Avatar, ListItem } from 'react-native-elements'
+import * as MediaLibrary from 'expo-media-library'
 import * as FileSystem from 'expo-file-system'
+import * as Permissions from 'expo-permissions'
 import { scale } from 'react-native-size-matters'
 import { showToast } from '../utils/function'
 import { theme } from '../core/theme'
@@ -32,19 +38,45 @@ function CollectionDetails({ route, navigation, collection }) {
     }
   }, [])
 
-  const downloadFile = (uri) => {
-    const path = uri.split('/')
-    const file_name = path[path.length - 1]
-    const fileUri = FileSystem.documentDirectory + file_name
-    FileSystem.downloadAsync(uri, fileUri)
-      .then((res) => {
-        console.log(res)
-      })
-      .catch((error) => {
-        console.log(error)
-      })
+  const downloadFile = (item) => {
+    Linking.openURL(item)
+
+    // FileSystem.downloadAsync(
+    //   'http://gahp.net/wp-content/uploads/2017/09/sample.pdf',
+    //   FileSystem.documentDirectory + 'small.pdf'
+    // )
+    //   .then(({ uri }) => {
+    //     console.log('Finished downloading to ', uri)
+    //   })
+    //   .catch((error) => {
+    //     console.error(error)
+    //   })
+
+    // const item = 'https://i.picsum.photos/id/469/200/200.jpg'
+    // console.log(uri, 'rere')
+    // const path = uri.split('/')
+    // const fileUri = FileSystem.documentDirectory + path[path.length - 1]
+    // console.log(path)
+    // FileSystem.downloadAsync(item, fileUri)
+    //   .then((res) => {
+    //     console.log(res, 'response')
+    //     saveFile(res.uri)
+    //   })
+    //   .catch((error) => {
+    //     console.error(error)
+    //   })
   }
 
+  const saveFile = async (fileUri) => {
+    if (Platform.OS === 'android') {
+      PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+      ]).then(async () => {
+        const asset = await MediaLibrary.createAssetAsync(fileUri)
+        await MediaLibrary.createAlbumAsync('Download', asset, false)
+      })
+    }
+  }
   const keyExtractor = (item, index) => index.toString()
 
   const renderItem = ({ item }) => (
@@ -56,7 +88,6 @@ function CollectionDetails({ route, navigation, collection }) {
           <ListItem.Subtitle style={styles.itemDesc}>
             {item.description}
           </ListItem.Subtitle>
-          {console.log(item)}
           <ListItem.Subtitle style={styles.itemDesc}>
             {item.condition_type}
           </ListItem.Subtitle>
