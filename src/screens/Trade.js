@@ -8,6 +8,7 @@ import {
   FlatList,
   ScrollView,
   Alert,
+  RefreshControl,
 } from 'react-native'
 import { connect } from 'react-redux'
 import Background from '../components/Background'
@@ -18,8 +19,19 @@ import { request } from '../utils/api'
 function Trade({ navigation, user }) {
   const [tradeReq, setTradeReq] = useState([])
   const [tradeHistory, setTradeHistory] = useState([])
+  const [refreshing, setRefreshing] = useState(false)
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true)
+    await getData()
+    setRefreshing(false)
+  }, [])
 
   useEffect(async () => {
+    await getData()
+  }, [])
+
+  const getData = async () => {
     const URL = `/trade/user/${user.id}?status=pending`
     const res = await request.get(URL)
     if (res.data) {
@@ -29,7 +41,7 @@ function Trade({ navigation, user }) {
     if (resHis.data) {
       setTradeHistory(resHis.data)
     }
-  }, [])
+  }
 
   const submit = async (status, id) => {
     const URL = `/trade/update?status=${status}&trade_id=${id}`
@@ -41,6 +53,7 @@ function Trade({ navigation, user }) {
         },
       ])
     }
+    await getData()
   }
 
   const keyExtractor = (item, index) => index.toString()
@@ -80,7 +93,12 @@ function Trade({ navigation, user }) {
           // route="TradeCreate"
           // create
         />
-        <ScrollView style={styles.requestContainerView}>
+        <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          style={styles.requestContainerView}
+        >
           {tradeReq && tradeReq.length > 0 ? (
             tradeReq.map((item, index) => (
               <Card>

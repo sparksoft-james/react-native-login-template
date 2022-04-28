@@ -1,102 +1,143 @@
 import React, { useEffect, useState } from 'react'
 import {
   FlatList,
-  PermissionsAndroid,
-  Platform,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
+  RefreshControl,
+  Alert,
 } from 'react-native'
+import { useFocusEffect } from '@react-navigation/native'
 import * as Linking from 'expo-linking'
-import CameraRoll from '@react-native-community/cameraroll'
 import { connect } from 'react-redux'
-
+import { bindActionCreators } from 'redux'
 import { Avatar, ListItem } from 'react-native-elements'
-import * as MediaLibrary from 'expo-media-library'
-import * as FileSystem from 'expo-file-system'
-import * as Permissions from 'expo-permissions'
 import { scale } from 'react-native-size-matters'
-import { showToast } from '../utils/function'
 import { theme } from '../core/theme'
-import { BOOKS, IMAGES, MUSICS } from '../utils/constant'
+import { getCollection } from '../redux/collection/collection.action'
+import {
+  BOOKS,
+  IMAGES,
+  MUSICS,
+  FILES,
+  BOOK_TYPE,
+  MUSIC_TYPE,
+  IMAGE_TYPE,
+  FILE_TYPE,
+} from '../utils/constant'
 import Background from '../components/Background'
 import Header from '../components/Header'
+import { request } from '../utils/api'
 
-function CollectionDetails({ route, navigation, collection }) {
+function CollectionDetails({
+  route,
+  navigation,
+  collection,
+  getCollectionFunc,
+  user,
+}) {
   const [data, setData] = useState()
   const { title = null } = route.params
+  const [refreshing, setRefreshing] = useState(false)
 
-  useEffect(() => {
-    if (title === BOOKS && collection.book && collection.book.length > 0) {
-      setData(collection.book)
-    }
-    if (title === IMAGES && collection.image && collection.image.length > 0) {
-      setData(collection.image)
-    }
-    if (title === MUSICS && collection.music && collection.music.length > 0) {
-      setData(collection.music)
-    }
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true)
+    await getData()
+    setRefreshing(false)
   }, [])
 
-  const downloadFile = (item) => {
-    Linking.openURL(item)
+  useEffect(() => {
+    getData()
+  }, [])
 
-    // FileSystem.downloadAsync(
-    //   'http://gahp.net/wp-content/uploads/2017/09/sample.pdf',
-    //   FileSystem.documentDirectory + 'small.pdf'
-    // )
-    //   .then(({ uri }) => {
-    //     console.log('Finished downloading to ', uri)
-    //   })
-    //   .catch((error) => {
-    //     console.error(error)
-    //   })
+  useFocusEffect(
+    React.useCallback(() => {
+      getData()
+    }, [])
+  )
 
-    // const item = 'https://i.picsum.photos/id/469/200/200.jpg'
-    // console.log(uri, 'rere')
-    // const path = uri.split('/')
-    // const fileUri = FileSystem.documentDirectory + path[path.length - 1]
-    // console.log(path)
-    // FileSystem.downloadAsync(item, fileUri)
-    //   .then((res) => {
-    //     console.log(res, 'response')
-    //     saveFile(res.uri)
-    //   })
-    //   .catch((error) => {
-    //     console.error(error)
-    //   })
-  }
-
-  const saveFile = async (fileUri) => {
-    if (Platform.OS === 'android') {
-      PermissionsAndroid.requestMultiple([
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-      ]).then(async () => {
-        const asset = await MediaLibrary.createAssetAsync(fileUri)
-        await MediaLibrary.createAlbumAsync('Download', asset, false)
-      })
+  const getData = async () => {
+    let res = {}
+    if (title === BOOKS) {
+      res = await getCollectionFunc(user.id, BOOK_TYPE)
+      setData(res.data)
+    }
+    if (title === IMAGES) {
+      res = await getCollectionFunc(user.id, IMAGE_TYPE)
+      setData(res.data)
+    }
+    if (title === MUSICS) {
+      res = await getCollectionFunc(user.id, MUSIC_TYPE)
+      setData(res.data)
+    }
+    if (title === FILES) {
+      res = await getCollectionFunc(user.id, FILE_TYPE)
+      setData(res.data)
     }
   }
+
+  const deleteItem = async (item) => {
+    const res = await request.postFormData('/collection/delete', {
+      collection_id: item.id,
+    })
+    if (res && res.responseCode === 0) {
+      Alert.alert('Action Success', res.responseMessage, [
+        {
+          text: 'OK',
+        },
+      ])
+      getData()
+    }
+  }
+
+  const showConfirmDialog = (item) => {
+    return Alert.alert(
+      'Remove Item',
+      'Are you sure you want to remove this item?',
+      [
+        // The "Yes" button
+        {
+          text: 'Yes',
+          onPress: () => {
+            deleteItem(item)
+          },
+        },
+        // The "No" button
+        // Does nothing but dismiss the dialog when tapped
+        {
+          text: 'No',
+        },
+      ]
+    )
+  }
+  const downloadFile = (item) => {
+    Linking.openURL(item)
+  }
+
   const keyExtractor = (item, index) => index.toString()
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => downloadFile(item.download_url)}>
-      <ListItem containerStyle={styles.itemListItem} bottomDivider>
-        <Avatar source={{ uri: item.thumbnail_url }} size={scale(50)} />
-        <ListItem.Content>
-          <ListItem.Title style={styles.itemName}>{item.name}</ListItem.Title>
-          <ListItem.Subtitle style={styles.itemDesc}>
-            {item.description}
-          </ListItem.Subtitle>
-          <ListItem.Subtitle style={styles.itemDesc}>
-            {item.condition_type}
-          </ListItem.Subtitle>
-        </ListItem.Content>
-        <ListItem.Chevron
-          iconProps={{ size: scale(15), name: 'file-download' }}
-        />
-      </ListItem>
-    </TouchableOpacity>
+    // <TouchableOpacity>
+    <ListItem containerStyle={styles.itemListItem} bottomDivider>
+      <Avatar source={{ uri: item.thumbnail_url }} size={scale(50)} />
+      <ListItem.Content>
+        <ListItem.Title style={styles.itemName}>{item.name}</ListItem.Title>
+        <ListItem.Subtitle style={styles.itemDesc}>
+          {item.description}
+        </ListItem.Subtitle>
+        <ListItem.Subtitle style={styles.itemDesc}>
+          {item.condition_type}
+        </ListItem.Subtitle>
+      </ListItem.Content>
+      <ListItem.Chevron
+        onPress={() => downloadFile(item.download_url)}
+        iconProps={{ size: scale(20), name: 'file-download' }}
+      />
+      <ListItem.Chevron
+        onPress={() => showConfirmDialog(item)}
+        iconProps={{ size: scale(20), name: 'delete' }}
+      />
+    </ListItem>
+    // </TouchableOpacity>
   )
 
   return (
@@ -110,6 +151,9 @@ function CollectionDetails({ route, navigation, collection }) {
         />
       )}
       <FlatList
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         keyExtractor={keyExtractor}
         data={data}
         renderItem={renderItem}
@@ -136,6 +180,10 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => ({
   collection: state.collection,
+  user: state.user,
 })
 
-export default connect(mapStateToProps)(CollectionDetails)
+const mapDispatchToProps = (dispatch) =>
+  bindActionCreators({ getCollectionFunc: getCollection }, dispatch)
+
+export default connect(mapStateToProps, mapDispatchToProps)(CollectionDetails)

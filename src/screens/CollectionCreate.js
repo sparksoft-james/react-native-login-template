@@ -14,7 +14,10 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { scale } from 'react-native-size-matters'
 import { Button, ButtonGroup, Input, Text } from 'react-native-elements'
 import * as DocumentPicker from 'expo-document-picker'
-import { postCollection } from '../redux/collection/collection.action'
+import {
+  postCollection,
+  getCollection,
+} from '../redux/collection/collection.action'
 // import DocumentPicker from 'react-native-document-picker'
 import { theme } from '../core/theme'
 import {
@@ -30,7 +33,13 @@ import {
 import Background from '../components/Background'
 import Header from '../components/Header'
 
-function CollectionCreate({ route, navigation, user, postCollectionFunc }) {
+function CollectionCreate({
+  route,
+  navigation,
+  user,
+  postCollectionFunc,
+  getCollectionFunc,
+}) {
   const { title = null } = route.params
   const [name, setName] = useState()
   const [description, setDescription] = useState()
@@ -57,7 +66,7 @@ function CollectionCreate({ route, navigation, user, postCollectionFunc }) {
     assignType()
   }, [])
 
-  const submit = () => {
+  const submit = async () => {
     let condition_type = 'used'
     if (collectionType === 1) {
       condition_type = 'used'
@@ -73,7 +82,8 @@ function CollectionCreate({ route, navigation, user, postCollectionFunc }) {
       thumbnail,
       file,
     }
-    postCollectionFunc(payload)
+    await postCollectionFunc(payload)
+    await getCollectionFunc()
   }
 
   async function openGallery(type) {
@@ -219,6 +229,9 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch) =>
-  bindActionCreators({ postCollectionFunc: postCollection }, dispatch)
+  bindActionCreators(
+    { postCollectionFunc: postCollection, getCollectionFunc: getCollection },
+    dispatch
+  )
 
 export default connect(mapStateToProps, mapDispatchToProps)(CollectionCreate)

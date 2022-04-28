@@ -21,13 +21,14 @@ export const getCollection =
     })
 
     if (res && res.data) {
-      // console.log('res', res)
+      console.log('res', res)
       dispatch({
         type: COLLECTION.SUCCESS,
         data_type: type,
         payload: res.data,
       })
     }
+    return res
   }
 
 export const postCollection = (payload) => async (dispatch) => {
@@ -55,6 +56,5 @@ export const postCollection = (payload) => async (dispatch) => {
         },
       ])
     }
-    getCollection()
   }
 }

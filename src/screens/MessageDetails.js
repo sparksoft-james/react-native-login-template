@@ -28,7 +28,6 @@ function MessageDetails({ route, navigation, user }) {
   const [message, setMessage] = useState()
   const [messageText, setMessageText] = useState()
   const [init, setInit] = useState(true)
-  const [currentId, setCurrentId] = useState(true)
 
   useEffect(async () => {
     // await delay(2000)
@@ -41,11 +40,24 @@ function MessageDetails({ route, navigation, user }) {
         const index = message.findIndex((m) => m.id === data.message.id)
         if (index < 0) {
           setMessage((previousMessages) => [...previousMessages, data.message])
-          console.log('newMessage xxxx', message)
         }
       }
     })
   }, [])
+
+  const getMessageData = async () => {
+    await delay(5000)
+    const URL = `/chat/getMessage?user_id=${user.id}&target_user_id=${item.id}`
+    const res = await request.get(URL)
+    if (res.data) {
+      setMessage(res.data.messages)
+    }
+  }
+
+  const delay = (ms) => new Promise((res) => setTimeout(res, ms))
+  useEffect(async () => {
+    await getMessageData()
+  }, 5000)
 
   const getChannelId = async () => {
     const URL = `/chat/getMessage?user_id=${user.id}&target_user_id=${item.id}`
@@ -63,6 +75,7 @@ function MessageDetails({ route, navigation, user }) {
     console.log(URL, 'url')
     const URL = `/chat/send?from_id=${user.id}&to_id=${item.id}&message=${messageText}&channel_id=${channel}`
     await request.post(URL)
+    await getMessageData()
     setMessageText('')
   }
 
